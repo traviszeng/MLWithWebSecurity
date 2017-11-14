@@ -8,6 +8,7 @@ import os
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import cross_val_score
+import numpy as np
 
 
 def load_kdd99(filename):
@@ -49,7 +50,9 @@ if __name__ == '__main__':
     x,y=get_rootkit2andNormal(v)
     clf = KNeighborsClassifier(n_neighbors=3)
     #十折交叉验证
-    print(cross_val_score(clf, x, y, n_jobs=-1, cv=10))
+    score = cross_val_score(clf, x, y, n_jobs=-1, cv=10)
+    print(score)
+    print(np.mean(score))
 
 
 
