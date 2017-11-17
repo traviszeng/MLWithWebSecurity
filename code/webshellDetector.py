@@ -1,13 +1,9 @@
 # -*- coding:utf-8 -*-
 
 import re
-import matplotlib.pyplot as plt
 import os
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import cross_val_score
-from sklearn.datasets import load_iris
-from sklearn import tree
-import pydotplus
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -34,9 +30,10 @@ def dirlist(path, allfile):
     filelist = os.listdir(path)
 
     for filename in filelist:
-        filepath = os.path.join(path, filename)
+        filepath = path+filename
+        #print(filepath)
         if os.path.isdir(filepath):
-            dirlist(filepath, allfile)
+            dirlist(filepath+'/', allfile)
         else:
             allfile.append(filepath)
     return allfile
@@ -69,9 +66,3 @@ if __name__ == '__main__':
     scores=cross_val_score(clf, x, y, n_jobs=-1, cv=10)
     print(scores)
     print(np.mean(scores))
-
-
-
-
-
-
