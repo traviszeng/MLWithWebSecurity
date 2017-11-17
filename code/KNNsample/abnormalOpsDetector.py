@@ -112,12 +112,12 @@ if __name__ == '__main__':
     
     #user_cmd_list,user_cmd_dist_max,user_cmd_dist_min=load_user_cmd("../data/MasqueradeDat/User3")
     #user_cmd_feature=get_user_cmd_feature(user_cmd_list,user_cmd_dist_max,user_cmd_dist_min)
-    user_cmd_list,dist=load_user_cmd_new("../data/MasqueradeDat/User3")
+    user_cmd_list,dist=load_user_cmd_new("../../data/MasqueradeDat/User3")
     print("Dist:(%s)" % dist)
     user_cmd_feature=get_user_cmd_feature_new(user_cmd_list,dist)
 
     #index=2 即为User3对应的label
-    labels=get_label("../data/MasqueradeDat/label.txt",2)
+    labels=get_label("../../data/MasqueradeDat/label.txt",2)
     #前5000个记录为正常操作 即前50个序列为正常操作
     y=[0]*50+labels
 

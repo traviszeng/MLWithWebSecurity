@@ -46,7 +46,7 @@ def get_rootkit2andNormal(x):
     return w,label
 
 if __name__ == '__main__':
-    v=load_kdd99("../data/kddcup99/corrected")
+    v=load_kdd99("../../data/kddcup99/corrected")
     x,y=get_rootkit2andNormal(v)
     clf = KNeighborsClassifier(n_neighbors=3)
     #十折交叉验证
