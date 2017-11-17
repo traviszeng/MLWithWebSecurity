@@ -1,3 +1,5 @@
+#决策树的helloworld 使用决策树对iris数据集进行分类
+
 from sklearn.datasets import load_iris
 from sklearn import tree
 import pydotplus
