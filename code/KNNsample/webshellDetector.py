@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+#使用KNN算法检测webshell
 
 import re
 import os

@@ -6,7 +6,7 @@ import pydotplus
 
 iris = load_iris()
 
-
+#建立决策树分类器
 clf = tree.DecisionTreeClassifier()
 clf = clf.fit(iris.data, iris.target)
 
