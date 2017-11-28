@@ -3,24 +3,28 @@
 from sklearn.model_selection import cross_val_score
 from sklearn.naive_bayes import GaussianNB
 import numpy as np
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
 
-
-import pickle
-import gzip
-
-
-def load_data():
-
-    with gzip.open('../../data/MNIST/mnist.pkl.gz') as fp:
-            training_data, valid_data, test_data = pickle.load(fp)
-
-    return training_data, valid_data, test_data
-
+def label2Vec(yy1):
+    y1 = []
+    for yy in yy1:
+        flag = 0
+        for yyy in yy:
+            if yyy==1:
+                y1.append(flag)
+            else:
+                flag+=1
+    return y1
 
 if __name__ == '__main__':
-    training_data, valid_data, test_data=load_data()
-    x1,y1=training_data
-    x2,y2=test_data
+    mnist = input_data.read_data_sets("../../data/MNIST",one_hot = True)
+    x1,yy1=mnist.train.images,mnist.train.labels
+    x2,yy2=mnist.test.images,mnist.test.labels
+
+    y1 = label2Vec(yy1)
+    y2 = label2Vec(yy2)
+                
     clf = GaussianNB()
     clf.fit(x1, y1)
     score = cross_val_score(clf, x2, y2, scoring="accuracy")
