@@ -2,7 +2,6 @@
 #朴素贝叶斯检测webshell
 
 import os
-import sys
 import numpy as np
 from sklearn.model_selection import cross_val_score
 from sklearn.feature_extraction.text import CountVectorizer

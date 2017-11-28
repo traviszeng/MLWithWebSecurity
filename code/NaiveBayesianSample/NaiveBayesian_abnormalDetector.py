@@ -1,14 +1,8 @@
 # -*- coding:utf-8 -*-
 #使用朴素贝叶斯分类器检测异常操作
 
-import sys
-import urllib
-import re
-from hmmlearn import hmm
+
 import numpy as np
-from sklearn.externals import joblib
-import nltk
-import matplotlib.pyplot as plt
 from nltk.probability import FreqDist
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import GaussianNB
