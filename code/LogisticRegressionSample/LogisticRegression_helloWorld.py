@@ -1,3 +1,5 @@
+#iris数据集演示logistic regression用法
+
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import linear_model, datasets
@@ -15,10 +17,9 @@ logreg = linear_model.LogisticRegression(C=1e5)
 logreg.fit(X, Y)
 
 
-#按两个特征的最大值最小值生成步长为0.02的等差数列特征
+#以两个特征的最大值和最小值作为范围生成0.02为步长的等差数列特征
 x1_min, x1_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5
 x2_min, x2_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
-#生成171*231的特征组
 x1, x2 = np.meshgrid(np.arange(x1_min, x1_max, h), np.arange(x2_min, x2_max, h))
 Z = logreg.predict(np.c_[x1.ravel(), x2.ravel()])
 
