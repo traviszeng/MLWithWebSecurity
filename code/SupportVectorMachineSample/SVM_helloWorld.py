@@ -16,6 +16,7 @@ clf.fit(X, Y)
 #构造超平面
 w = clf.coef_[0]
 a = -w[0] / w[1]
+#-5到5之间生成50个点
 xx = np.linspace(-5, 5)
 yy = a * xx - (clf.intercept_[0]) / w[1]
 
