@@ -21,7 +21,7 @@ N=8
 T=-50
 
 #模型文件名
-FILE_MODEL="9-2.m"
+FILE_MODEL="DGA_svm_model.m"
 
 def load_alexa(filename):
     domain_list=[]
