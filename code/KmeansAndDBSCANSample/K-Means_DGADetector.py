@@ -51,9 +51,9 @@ def load_dga(filename):
 
 
 def kmeans_dga():
-    x1_domain_list = load_alexa("../../data/DGA_data/top-1000.csv")
-    x2_domain_list = load_dga("../../data/DGA_data/dga-cryptolocke-1000.txt")
-    x3_domain_list = load_dga("../../data/DGA_data/dga-post-tovar-goz-1000.txt")
+    x1_domain_list = load_alexa("../../data/DGA_data/top-100.csv")
+    x2_domain_list = load_dga("../../data/DGA_data/dga-cryptolocke-50.txt")
+    x3_domain_list = load_dga("../../data/DGA_data/dga-post-tovar-goz-50.txt")
 
     x_domain_list=np.concatenate((x1_domain_list, x2_domain_list,x3_domain_list))
     #x_domain_list = np.concatenate((x1_domain_list, x2_domain_list))
@@ -85,7 +85,7 @@ def kmeans_dga():
         if y_pred[i] == 1:
             plt.scatter(x1,x2,marker='o')
         else:
-            plt.scatter(x1, x2,marker='x')
+            plt.scatter(x1,x2,marker='x')
         #plt.annotate(label,xy=(x1,x2),xytext=(x1,x2))
 
     plt.show()
