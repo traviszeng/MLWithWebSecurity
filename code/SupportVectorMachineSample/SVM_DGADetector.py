@@ -1,16 +1,20 @@
 # -*- coding:utf-8 -*-
 
-import sys
-import urllib
 import re
 from hmmlearn import hmm
 import numpy as np
 from sklearn.externals import joblib
-import nltk
 import csv
 import matplotlib.pyplot as plt
 import os
 
+#处理DGA域名检测时候的特征化：
+#1.计算元音字母的比例
+#2.去重后字母数字个数和域名长度的比例
+#3.平均jarccard系数
+#4.hmm系数
+
+#todo:使用特征化后的训练svm模型
 
 #处理域名的最小长度
 MIN_LEN=10
@@ -38,6 +42,7 @@ def domain2ver(domain):
         ver.append([ord(domain[i])])
     return ver
 
+#计算HMM系数
 def train_hmm(domain_list):
     X = [[0]]
     X_lens = [1]
@@ -91,7 +96,7 @@ def test_alexa(remodel,filename):
     return x, y
 
 def show_hmm():
-    domain_list = load_alexa("../../DGA_data/data/top-1000.csv")
+    domain_list = load_alexa("../../data/DGA_data/top-1000.csv")
     if not os.path.exists(FILE_MODEL):
         remodel=train_hmm(domain_list)
     remodel=joblib.load(FILE_MODEL)
@@ -107,7 +112,8 @@ def show_hmm():
     ax.legend(loc='best')
     plt.show()
 
-
+#计算元音字母的比例
+#正常的域名会有人类取名的因素会导致比较好记好读，因此根据数学统计会导致元音的比例比较高
 def get_aeiou(domain_list):
     x=[]
     y=[]
@@ -118,6 +124,7 @@ def get_aeiou(domain_list):
         y.append(count)
     return x,y
 
+#测试元音字母的比例是否对DGA域名具有区分度
 def show_aeiou():
     x1_domain_list = load_alexa("../../data/DGA_data/top-1000.csv")
     x_1,y_1=get_aeiou(x1_domain_list)
@@ -135,6 +142,8 @@ def show_aeiou():
     ax.legend(loc='best')
     plt.show()
 
+#求去重后字母数字个数与域名长度的比例
+#例如google的比例是4/6
 def get_uniq_char_num(domain_list):
     x=[]
     y=[]
@@ -145,6 +154,7 @@ def get_uniq_char_num(domain_list):
         y.append(count)
     return x,y
 
+#测试去重后字母数字个数与域名长度的比例对DGA域名是否有区分
 def show_uniq_char_num():
     x1_domain_list = load_alexa("../../data/DGA_data/top-1000.csv")
     x_1,y_1=get_uniq_char_num(x1_domain_list)
@@ -162,7 +172,9 @@ def show_uniq_char_num():
     ax.legend(loc='best')
     plt.show()
 
-
+#计算两个域名之间的jarccard系数
+#jarccard系数定义为两个集合交集和并集元素个数的比值，
+#本例中的jarccard系数基于2-gram计算
 def count2string_jarccard_index(a,b):
     x=set(' '+a[0])
     y=set(' '+b[0])
@@ -184,6 +196,7 @@ def get_jarccard_index(a_list,b_list):
         j=0.0
         for b in b_list:
             j+=count2string_jarccard_index(a,b)
+
         x.append(len(a))
         y.append(j/len(b_list))
 
@@ -207,11 +220,16 @@ def show_jarccard_index():
     ax.legend(loc='lower right')
     plt.show()
 
+
 if __name__ == '__main__':
-    #show_hmm()
+    #计算hmm系数
+    show_hmm()
+    #元音字母出现比例对DGA域名的区分
     #show_aeiou()
+    #测试去重后字母数字个数与域名长度的比例对DGA域名是否有区分
     #show_uniq_char_num()
-    show_jarccard_index()
+    #平均jarccard系数区分
+    #show_jarccard_index()
 
 
 
