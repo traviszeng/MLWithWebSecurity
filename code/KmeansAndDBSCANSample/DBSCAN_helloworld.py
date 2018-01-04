@@ -1,5 +1,4 @@
-print(__doc__)
-
+#DBSCAN算法的helloworld
 import numpy as np
 
 from sklearn.cluster import DBSCAN
@@ -10,10 +9,19 @@ import matplotlib.pyplot as plt
 
 def show_dbscan():
     centers = [[1, 1], [-1, -1], [1, -1]]
-    X, labels_true = make_blobs(n_samples=750, centers=centers, cluster_std=0.4,
+    #创建测试样本
+    X, labels_true = make_blobs(n_samples=750,
+                                centers=centers,
+                                cluster_std=0.4,
                                 random_state=0)
 
     X = StandardScaler().fit_transform(X)
+    #DBSCAN主要参数:
+    #eps:同一聚类集合中两个样本的最大距离
+    #min_samples:同一聚类样本集合中最小样本数
+    #algorithm:算法分为：'auto','ball_tree','kd_tree','brute'
+    #leaf_size:使用balltree或者cKDTree算法时的叶子结点的个数
+    #n_jobs:并发任务数
     db = DBSCAN(eps=0.3, min_samples=10).fit(X)
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
