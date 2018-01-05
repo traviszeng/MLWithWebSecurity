@@ -1,99 +1,129 @@
+#!python3
+# -*- coding: utf-8 -*-
+from numpy import *
+
+def loadDataSet():
+    return [[1, 3, 4], [2, 3, 5], [1, 2, 3, 5], [2, 5]]
+
+# C1 是大小为1的所有候选项集的集合
 def createC1(dataSet):
     C1 = []
     for transaction in dataSet:
         for item in transaction:
-            if [item] not in C1:
-                C1.append([item])
+            if not [item] in C1:
+                C1.append([item]) #store all the item unrepeatly
+
     C1.sort()
-    return map(frozenset, C1)
+    #return map(frozenset, C1)#frozen set, user can't change it.
+    return list(map(frozenset, C1))
 
-
-def scanD(D, Ck, minSupport):
-    ssCnt = {}
-    numItems = float(len(list(D)))
+#找出ck字典中所有的序列在D数据集中出现的次数以及由此计算出的频繁度
+def scanD(D,Ck,minSupport):
+    ssCnt={}
+    # 找出ck字典中所有的序列在D数据集中出现的次数
     for tid in D:
         for can in Ck:
             if can.issubset(tid):
-                ssCnt[can] = ssCnt.get(can, 0) + 1
-    #print(numItems)
+                #if not ssCnt.has_key(can):
+                if not can in ssCnt:
+                    ssCnt[can]=1
+                else:
+                    ssCnt[can]+=1
+    numItems=float(len(D))
     retList = []
     supportData = {}
+    # 计算每个序列的频繁度
     for key in ssCnt:
-        support = ssCnt[key] / numItems
+        support = ssCnt[key]/numItems #compute support
         if support >= minSupport:
-            retList.insert(0, key)
+            retList.insert(0,key)
         supportData[key] = support
     return retList, supportData
 
-
-def aprioriGen(Lk, k):
+#total apriori
+#Lk是k-1层的频繁度序列，这里是拼接处k层序列，在用上面的scanD函数计算出合格的序列
+def aprioriGen(Lk, k): #组合，向上合并
+    #creates Ck 参数：频繁项集列表 Lk 与项集元素个数 k
     retList = []
     lenLk = len(Lk)
     for i in range(lenLk):
-        for j in range(i + 1, lenLk):
-            L1 = list(Lk[i])[: k - 2];
-            L2 = list(Lk[j])[: k - 2];
-            L1.sort();
+        for j in range(i+1, lenLk): #两两组合遍历
+            L1 = list(Lk[i])[:k-2]
+            L2 = list(Lk[j])[:k-2]
+            L1.sort()
             L2.sort()
-            if L1 == L2:
-                retList.append(Lk[i] | Lk[j])
+            if L1==L2: #若两个集合的前k-2个项相同时,则将两个集合合并
+                retList.append(Lk[i] | Lk[j]) #set union
     return retList
 
-
-def apriori(dataSet, minSupport=0.5):
-    tmp = dataSet
+#apriori
+def apriori(dataSet, minSupport = 0.5):
     C1 = createC1(dataSet)
-    D = map(set, tmp)
-    L1, suppData = scanD(D, C1, minSupport)
+    D = list(map(set, dataSet)) #python3
+    L1, supportData = scanD(D, C1, minSupport)#单项最小支持度判断 0.5，生成L1
     L = [L1]
     k = 2
-
-    while (len(L[k - 2]) > 0):
-        Ck = aprioriGen(L[k - 2], k)
-        Lk, supK = scanD(D, Ck, minSupport)
-        suppData.update(supK)
+    while (len(L[k-2]) > 0):#创建包含更大项集的更大列表,直到下一个大的项集为空
+        Ck = aprioriGen(L[k-2], k)#Ck
+        Lk, supK = scanD(D, Ck, minSupport)#get Lk
+        supportData.update(supK)
         L.append(Lk)
-        k += 1
-    return L, suppData
+        k += 1 #继续向上合并 生成项集个数更多的
+    # L是所有的合格的频繁度序列，supportData是一个字典，键是序列，值是支持度
+    return L, supportData
 
+#生成关联规则
+def generateRules(L, supportData, minConf=0.7):
+    #频繁项集列表、包含那些频繁项集支持数据的字典、最小可信度阈值
+    bigRuleList = [] #存储所有的关联规则
+    for i in range(1, len(L)):  #只获取有两个或者更多集合的项目，从1,即第二个元素开始，L[0]是单个元素的
+        # 两个及以上的才可能有关联一说，单个元素的项集不存在关联问题
+        for freqSet in L[i]:
+            H1 = [frozenset([item]) for item in freqSet]
+            #该函数遍历L中的每一个频繁项集并对每个频繁项集创建只包含单个元素集合的列表H1
+            if (i > 1):
+            #如果频繁项集元素数目超过2,那么会考虑对它做进一步的合并
+                rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
+            else:#第一层时，后件数为1
+                calcConf(freqSet, H1, supportData, bigRuleList, minConf)# 调用函数2
+    return bigRuleList
 
+#生成候选规则集合：计算规则的可信度以及找到满足最小可信度要求的规则
 def calcConf(freqSet, H, supportData, brl, minConf=0.7):
-    prunedH = []
-    for conseq in H:
-        conf = supportData[freqSet] / supportData[freqSet - conseq]
+    #针对项集中只有两个元素时，计算可信度
+    prunedH = []#返回一个满足最小可信度要求的规则列表
+    for conseq in H:#后件，遍历 H中的所有项集并计算它们的可信度值
+        conf = supportData[freqSet]/supportData[freqSet-conseq] #可信度计算，结合支持度数据
         if conf >= minConf:
-            print(freqSet - conseq, '-->', conseq, 'conf:', conf)
-            brl.append((freqSet - conseq, conseq, conf))
-            prunedH.append(conseq)
+            print (freqSet-conseq,'-->',conseq,'conf:',conf)
+            #如果某条规则满足最小可信度值,那么将这些规则输出到屏幕显示
+            brl.append((freqSet-conseq, conseq, conf))#添加到规则里，brl 是前面通过检查的 bigRuleList
+            prunedH.append(conseq)#同样需要放入列表到后面检查
     return prunedH
 
-
+#合并
 def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
+    #参数:一个是频繁项集,另一个是可以出现在规则右部的元素列表 H
     m = len(H[0])
-
-    if len(freqSet) > m + 1:
-        Hmp1 = aprioriGen(H, m + 1)
-        Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)
-
-        if len(Hmp1) > 1:
+    if (len(freqSet) > (m + 1)): #频繁项集元素数目大于单个集合的元素数
+        Hmp1 = aprioriGen(H, m+1)#存在不同顺序、元素相同的集合，合并具有相同部分的集合
+        Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)#计算可信度
+        if (len(Hmp1) > 1):    #满足最小可信度要求的规则列表多于1,则递归
             rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)
 
 
-def generateRules(L, supportData, minConf=0.7):
-    bigRuleList = []
-    for i in range(1, len(L)):
-        for freqSet in L[i]:
-            H1 = [frozenset([item]) for item in freqSet]
+if __name__=='__main__':
+    data = loadDataSet()
 
-            if i > 1:
-                rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
-            else:
-                calcConf(freqSet, H1, supportData, bigRuleList, minConf)
-    return bigRuleList
-
-if __name__ == '__main__':
-    myDat = [ [ 1, 3, 4 ], [ 2, 3, 5 ], [ 1, 2, 3, 5 ], [ 2, 5 ] ]
-
-    L, suppData = apriori(myDat, 0.5)
+    L, suppData = apriori(data, 0.5)
     rules = generateRules(L, suppData, minConf=0.7)
-    print('rules:\n', rules)
+
+    print('rules:\n',rules)
+
+#结果：
+#frozenset({1}) --> frozenset({3}) conf: 1.0
+#frozenset({5}) --> frozenset({2}) conf: 1.0
+#frozenset({2}) --> frozenset({5}) conf: 1.0
+#rules:
+# [(frozenset({1}), frozenset({3}), 1.0), (frozenset({5}), frozenset({2}), 1.0), (frozenset({2}), frozenset({5}), 1.0)]
+
