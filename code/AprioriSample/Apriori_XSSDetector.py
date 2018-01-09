@@ -21,6 +21,6 @@ if __name__ == '__main__':
                 myDat.append(tokens)
         f.close()
 
-    L, suppData = apriori(myDat, 0.15)
+    L, suppData = apriori(myDat, 0.001)
     rules = generateRules(L, suppData, minConf=0.99)
     #print 'rules:\n', rules
