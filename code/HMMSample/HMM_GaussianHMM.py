@@ -1,3 +1,4 @@
+#Gaussian HMM HelloWorld
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,6 +35,10 @@ model.startprob_ = startprob
 model.transmat_ = transmat
 model.means_ = means
 model.covars_ = covars
+
+seen = np.array([[1.1,2.0],[-1,2.0],[3,7]])
+logprob, state = model.decode(seen, algorithm="viterbi")
+print(state)
 
 # Generate samples
 X, Z = model.sample(500)
