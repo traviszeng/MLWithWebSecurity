@@ -103,7 +103,11 @@ def load_wordbag(filename,max=100):
         else:
             wordbag[localkey] = index_wordbag
             index_wordbag += 1
-    print("wordbag as:",wordbag)
+    try:
+        print("wordbag as:",wordbag)
+    except UnicodeEncodeError:
+        pass
+        
     print("GET wordbag size(%d)" % index_wordbag)
 def main(filename):
     X = [[-1]]
@@ -243,4 +247,4 @@ if __name__ == '__main__':
     remodel = main(sys.argv[1])
     
     test(remodel, sys.argv[2])
-    test_normal(remodel, sys.argv[3])
+    #test_normal(remodel, sys.argv[3])
