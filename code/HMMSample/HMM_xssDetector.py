@@ -1,3 +1,4 @@
+#-*- coding:utf-8 –*-
 import sys
 import urllib
 import re
@@ -10,7 +11,7 @@ import nltk
 
 
 #处理参数值的最小长度
-MIN_LEN=6
+MIN_LEN=4
 
 #状态个数
 N=10
@@ -20,7 +21,7 @@ T=-200
 #数字 1
 #<>,:"'
 #其他字符2
-SEN=['<','>',',',':','\'','/',';','"','{','}','(',')']
+SEN=['^','-','_','+']
 
 def ischeck(str):
     if re.match(r'^(http)',str):
@@ -35,25 +36,30 @@ def ischeck(str):
 
     return False
 
+#参数泛化
 def etl(str):
     vers=[]
     for i, c in enumerate(str):
         c=c.lower()
+        #将[a-zA-Z]泛化为A
         if   ord(c) >= ord('a') and  ord(c) <= ord('z'):
-            vers.append([ord(c)])
+            vers.append([float(ord('A'))])
+        #将数字泛化为N
         elif ord(c) >= ord('0') and  ord(c) <= ord('9'):
-            vers.append([1])
+            vers.append([float(ord('N'))])
+        
         elif c in SEN:
-            vers.append([ord(c)])
+            vers.append([float(ord('C'))])
         else:
-            vers.append([2])
+            vers.append([float(ord('T'))])
 
     #print vers
     return np.array(vers)
 
 def do_str(line):
     words=nltk.word_tokenize(line)
-    print(words)
+    #print(words)
+    return words
 
 def main(filename):
     X = [[0]]
@@ -66,33 +72,43 @@ def main(filename):
             #处理html转义字符
             line=HTMLParser().unescape(line)
             if len(line) >= MIN_LEN:
-                print("Learning xss query param:(%s)" % line)
-                do_str(line)
+                try:
+                    print("Learning xss query param:(%s)" % line)
+                    word = do_str(line)
+                    vers = etl(word[2][7:])
+                    #print(wordetl.tolist())
+                except UnicodeEncodeError:
+                    pass
 
-            #X=np.concatenate( [X,vers])
-            #X_lens.append(len(vers))
+
+                X=np.concatenate( [X,vers])
+                X_lens.append(len(vers))
 
 
-    #print X
-    #remodel = hmm.GaussianHMM(n_components=N, covariance_type="full", n_iter=100)
-    #remodel.fit(X,X_lens)
-    #joblib.dump(remodel, "xss-train.pkl")
+    #print(X)
+    #print(X_lens)
+    remodel = hmm.GaussianHMM(n_components=4, covariance_type="full", n_iter=100)
+    remodel.fit(X,X_lens)
+    joblib.dump(remodel, "xss-train.pkl")
 
-    #return remodel
+    return remodel
 
 def test(remodel,filename):
     with open(filename) as f:
         for line in f:
             # 切割参数
-            result = urlparse.urlparse(line)
+            result = urllib.parse.urlparse(line)
             # url解码
             query = urllib.parse.unquote(result.query)
-            params = urlparse.parse_qsl(query, True)
+            params = urllib.parse.parse_qsl(query, True)
 
             for k, v in params:
 
                 if ischeck(v) and len(v) >=N :
+                    #print(v)
                     vers = etl(v)
+                    #print(vers)
+                    print(remodel.transmat_)
                     pro = remodel.score(vers)
                     #print  "CHK SCORE:(%d) QUREY_PARAM:(%s) XSS_URL:(%s) " % (pro, v, line)
                     if pro >= T:
@@ -102,7 +118,7 @@ def test(remodel,filename):
 
 
 if __name__ == '__main__':
-    #remodel=main(sys.argv[1])
-    #test(remodel,sys.argv[2])
+    remodel=main(sys.argv[1])
+    test(remodel,sys.argv[2])
     #nltk.download()
-    main('../../data/XSSdata/good-xss-10000.txt')
+    #main(sys.argv[1])

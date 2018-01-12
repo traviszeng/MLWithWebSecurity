@@ -1,0 +1,13 @@
+/0_1/include/dialog/select_media.php?userid=admin123
+/0_1/include/dialog/select_media.php?userid=root
+/0_1/include/dialog/select_media.php?userid=maidou0605
+/0_1/include/dialog/select_media.php?userid=52maidjh
+/0_1/include/dialog/select_media.php?userid=123456-asd
+/0_1/include/dialog/select_media.php?userid=asd_2014
+/0_1/include/dialog/select_media.php?userid=msdkj-asldkj
+/0_1/include/dialog/select_media.php?userid=asd123as-as
+/0_1/include/dialog/select_media.php?userid=lkj-1asd
+/0_1/include/dialog/select_media.php?userid=1sd*21s32
+/0_1/include/dialog/select_media.php?userid=12345^sdas
+/0_1/include/dialog/select_media.php?userid=_asda1013
+/0_1/include/dialog/select_media.php?userid=*asd132
