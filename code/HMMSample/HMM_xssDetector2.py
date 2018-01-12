@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+import warnings
+
+
 
 import sys
 import urllib
@@ -73,7 +76,7 @@ def load_wordbag(filename,max=100):
         for line in f:
             line=line.strip('\n')
             #url解码
-            line=urllib.unquote(line)
+            line=urllib.parse.unquote(line)
             #处理html转义字符
             line=HTMLParser().unescape(line)
             if len(line) >= MIN_LEN:
@@ -92,7 +95,7 @@ def load_wordbag(filename,max=100):
 
 
     fredist = nltk.FreqDist(tokens_list)  # 单文件词频
-    keys=fredist.keys()
+    keys=list(fredist.keys())
     keys=keys[:max]
     for localkey in keys:  # 获取统计后的不重复词集
         if localkey in wordbag.keys():  # 判断该词是否已在词袋中
@@ -100,7 +103,7 @@ def load_wordbag(filename,max=100):
         else:
             wordbag[localkey] = index_wordbag
             index_wordbag += 1
-
+    print("wordbag as:",wordbag)
     print("GET wordbag size(%d)" % index_wordbag)
 def main(filename):
     X = [[-1]]
@@ -112,10 +115,9 @@ def main(filename):
         for line in f:
             line=line.strip('\n')
             #url解码
-            line=urllib.unquote(line)
+            line=urllib.parse.unquote(line)
             #处理html转义字符
-            h = HTMLParser.HTMLParser()
-            line=h.unescape(line)
+            line=HTMLParser().unescape(line)
             if len(line) >= MIN_LEN:
                 #print "Learning xss query param:(%s)" % line
                 #数字常量替换成8
@@ -153,10 +155,9 @@ def test(remodel,filename):
         for line in f:
             line = line.strip('\n')
             # url解码
-            line = urllib.unquote(line)
+            line = urllib.parse.unquote(line)
             # 处理html转义字符
-            h = HTMLParser.HTMLParser()
-            line = h.unescape(line)
+            line = HTMLParser().unescape(line)
 
             if len(line) >= MIN_LEN:
                 #print  "CHK XSS_URL:(%s) " % (line)
@@ -182,8 +183,11 @@ def test(remodel,filename):
                         #print  "CHK SCORE:(%d) QUREY_PARAM:(%s) XSS_URL:(%s) " % (pro, v, line)
                 pro = remodel.score(np_vers)
 
-                if pro >= T:
+                #if pro <= T:
+                try:
                     print("SCORE:(%d) XSS_URL:(%s) " % (pro,line))
+                except UnicodeEncodeError:
+                    continue
                         #print line
 
 def test_normal(remodel,filename):
@@ -222,16 +226,21 @@ def test_normal(remodel,filename):
                     # print np_vers
                     # print  "CHK SCORE:(%d) QUREY_PARAM:(%s) XSS_URL:(%s) " % (pro, v, line)
                     pro = remodel.score(np_vers)
-                    print("CHK SCORE:(%d) QUREY_PARAM:(%s)" % (pro, v))
+                    try:
+                        print("CHK SCORE:(%d) QUREY_PARAM:(%s)" % (pro, v))
+                    except UnicodeEncodeError:
+                        continue
                     #if pro >= T:
                         #print  "SCORE:(%d) XSS_URL:(%s) " % (pro, v)
                         #print line
 
 if __name__ == '__main__':
+    #忽略warning
+    warnings.filterwarnings("ignore")
     #test(remodel,sys.argv[2])
     load_wordbag(sys.argv[1],2000)
     #print  wordbag.keys()
     remodel = main(sys.argv[1])
-    #test_normal(remodel, sys.argv[2])
+    
     test(remodel, sys.argv[2])
-
+    test_normal(remodel, sys.argv[3])
