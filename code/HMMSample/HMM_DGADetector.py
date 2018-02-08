@@ -1,16 +1,14 @@
 # -*- coding:utf-8 -*-
 
 import sys
-import urllib
-import urlparse
 import re
 from hmmlearn import hmm
 import numpy as np
 from sklearn.externals import joblib
-import HTMLParser
 import nltk
 import csv
 import matplotlib.pyplot as plt
+import warnings
 
 
 #处理域名的最小长度
@@ -22,14 +20,14 @@ N=8
 T=-50
 
 #模型文件名
-FILE_MODEL="12-4.m"
+FILE_MODEL="dgaMODEL.m"
 
 def load_alexa(filename):
     domain_list=[]
     csv_reader = csv.reader(open(filename))
     for row in csv_reader:
         domain=row[1]
-        if domain >= MIN_LEN:
+        if len(domain) >= MIN_LEN:
             domain_list.append(domain)
     return domain_list
 
@@ -39,6 +37,7 @@ def domain2ver(domain):
         ver.append([ord(domain[i])])
     return ver
 
+#用alexa训练hmm
 def train_hmm(domain_list):
     X = [[0]]
     X_lens = [1]
@@ -61,7 +60,7 @@ def load_dga(filename):
     with open(filename) as f:
         for line in f:
             domain=line.split(",")[0]
-            if domain >= MIN_LEN:
+            if len(domain) >= MIN_LEN:
                 domain_list.append(domain)
     return  domain_list
 
@@ -92,14 +91,18 @@ def test_alexa(remodel,filename):
     return x, y
 
 if __name__ == '__main__':
+    #ignore deprecation warnings
+    warnings.filterwarnings('ignore')
     #domain_list=load_alexa("../data/top-1m.csv")
-    domain_list = load_alexa("../data/top-1000.csv")
+    domain_list = load_alexa("../../data/DGA_data/top-1000.csv")
+    #首次训练
     #remodel=train_hmm(domain_list)
+    #再次测试时加载模型
     remodel=joblib.load(FILE_MODEL)
-    x_3,y_3=test_dga(remodel, "../data/dga-post-tovar-goz-1000.txt")
-    x_2,y_2=test_dga(remodel,"../data/dga-cryptolocke-1000.txt")
-    x_1,y_1=test_alexa(remodel, "../data/test-top-1000.csv")
-    #test_alexa(remodel, "../data/top-1000.csv")
+    x_3,y_3=test_dga(remodel, "../../data/DGA_data/dga-post-tovar-goz-1000.txt")
+    x_2,y_2=test_dga(remodel,"../../data/DGA_data/dga-cryptolocke-1000.txt")
+    x_1,y_1=test_alexa(remodel, "../../data/DGA_data/test-top-1000.csv")
+    #test_alexa(remodel, "../../data/DGA_data/top-1000.csv")
     #%matplotlib inline
     fig,ax=plt.subplots()
     ax.set_xlabel('Domain Length')
