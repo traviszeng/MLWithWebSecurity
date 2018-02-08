@@ -73,25 +73,29 @@ def load_wordbag(filename,max=100):
     global index_wordbag
 
     with open(filename) as f:
-        for line in f:
-            line=line.strip('\n')
-            #url解码
-            line=urllib.parse.unquote(line)
-            #处理html转义字符
-            line=HTMLParser().unescape(line)
-            if len(line) >= MIN_LEN:
-                #print "Learning xss query param:(%s)" % line
-                #数字常量替换成8
-                line, number = re.subn(r'\d+', "8", line)
-                #ulr日换成http://u
-                line, number = re.subn(r'(http|https)://[a-zA-Z0-9\.@&/#!#\?:=]+', "http://u", line)
-                #干掉注释
-                line, number = re.subn(r'\/\*.?\*\/', "", line)
-                #print "Learning xss query etl param:(%s) " % line
-                tokens_list+=do_str(line)
+        try:
+            for line in f:
+                    line=line.strip('\n')
+                    #url解码
+                    line=urllib.parse.unquote(line)
+                    #处理html转义字符
+                    line=HTMLParser().unescape(line)
+                    if len(line) >= MIN_LEN:
+                        #print "Learning xss query param:(%s)" % line
+                        #数字常量替换成8
+                        line, number = re.subn(r'\d+', "8", line)
+                        #ulr日换成http://u
+                        line, number = re.subn(r'(http|https)://[a-zA-Z0-9\.@&/#!#\?:=]+', "http://u", line)
+                        #干掉注释
+                        line, number = re.subn(r'\/\*.?\*\/', "", line)
+                        #print "Learning xss query etl param:(%s) " % line
+                        tokens_list+=do_str(line)
 
-            #X=np.concatenate( [X,vers])
-            #X_lens.append(len(vers))
+                    #X=np.concatenate( [X,vers])
+                    #X_lens.append(len(vers))
+        except UnicodeDecodeError:
+            pass
+
 
 
     fredist = nltk.FreqDist(tokens_list)  # 单文件词频
@@ -116,35 +120,38 @@ def main(filename):
     global index_wordbag
 
     with open(filename) as f:
-        for line in f:
-            line=line.strip('\n')
-            #url解码
-            line=urllib.parse.unquote(line)
-            #处理html转义字符
-            line=HTMLParser().unescape(line)
-            if len(line) >= MIN_LEN:
-                #print "Learning xss query param:(%s)" % line
-                #数字常量替换成8
-                line, number = re.subn(r'\d+', "8", line)
-                #ulr日换成http://u
-                line, number = re.subn(r'(http|https)://[a-zA-Z0-9\.@&/#!#\?:]+', "http://u", line)
-                #干掉注释
-                line, number = re.subn(r'\/\*.?\*\/', "", line)
-                #print "Learning xss query etl param:(%s) " % line
-                words=do_str(line)
-                vers=[]
-                for word in words:
-                    #print "ADD %s" % word
-                    if word in wordbag.keys():
-                        vers.append([wordbag[word]])
-                    else:
-                        vers.append([-1])
+        try:
+            for line in f:
+                line=line.strip('\n')
+                #url解码
+                line=urllib.parse.unquote(line)
+                #处理html转义字符
+                line=HTMLParser().unescape(line)
+                if len(line) >= MIN_LEN:
+                    #print "Learning xss query param:(%s)" % line
+                    #数字常量替换成8
+                    line, number = re.subn(r'\d+', "8", line)
+                    #ulr日换成http://u
+                    line, number = re.subn(r'(http|https)://[a-zA-Z0-9\.@&/#!#\?:]+', "http://u", line)
+                    #干掉注释
+                    line, number = re.subn(r'\/\*.?\*\/', "", line)
+                    #print "Learning xss query etl param:(%s) " % line
+                    words=do_str(line)
+                    vers=[]
+                    for word in words:
+                        #print "ADD %s" % word
+                        if word in wordbag.keys():
+                            vers.append([wordbag[word]])
+                        else:
+                            vers.append([-1])
 
-            np_vers = np.array(vers)
-            #print np_vers
-            X=np.concatenate([X,np_vers])
-            X_lens.append(len(np_vers))
-            #print X_lens
+                np_vers = np.array(vers)
+                #print np_vers
+                X=np.concatenate([X,np_vers])
+                X_lens.append(len(np_vers))
+                #print X_lens
+        except UnicodeDecodeError:
+            pass
 
 
 
